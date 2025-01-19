@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis Queue with WebSocket</title>
+</head>
+<body>
+    <h1>Submit Task</h1>
+    <form id="taskForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required><br>
+
+        <label for="year">Language:</label>
+        <input type="text" id="year" required><br>
+
+        <label for="language">Code:</label>
+        <input type="text" id="language" required><br>
+
+        <button type="submit">Submit Task</button>
+    </form>
+
+    <h2>Task Result</h2>
+    <div id="taskResult">Waiting for result...</div>
+
+    <script>
+        // Generate a unique client ID for the session
+        function generateClientId() {
+            return 'client-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        const clientId = generateClientId();
+
+        // Connect to the WebSocket server with the clientId
+        const ws = new WebSocket(`ws://localhost:3000?clientId=${clientId}`);
+
+        ws.onopen = () => {
+            console.log("Connected to WebSocket server");
+        };
+
+        ws.onmessage = (message) => {
+            // Handle messages received from the WebSocket server
+            const data = JSON.parse(message.data);
+            console.log("Task result received from WebSocket:", data);
+
+            // Display the result (or any other task-related data)
+            document.getElementById("taskResult").innerText = `Result: ${data.result}`;
+        };
+
+        ws.onclose = () => {
+            console.log("Disconnected from WebSocket server");
+        };
+
+        // Function to submit a task to the server
+        async function submitTask(name, year, language) {
+            try {
+                const response = await fetch("http://localhost:3000/send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        clientId: clientId,
+                        name: name,
+                        year: year,
+                        language: language,
+                    }),
+                });
+
+                if (response.ok) {
+                    console.log("Task submitted successfully",response);
+                    document.getElementById("taskResult").innerText = `Your data is send in the queue succesfully and id is ${clientId} , waiting for the result`;
+
+                   // document.getElementById("taskResult").innerText = `Result: ${response}`;
+                } else {
+                    console.error("Failed to submit task");
+                }
+            } catch (error) {
+                console.error("Error submitting task:", error);
+            }
+        }
+
+        // Handle form submission
+        document.getElementById("taskForm").onsubmit = async (e) => {
+            e.preventDefault();
+
+            // Get form values
+            const name = document.getElementById("name").value;
+            const year = document.getElementById("year").value;
+            const language = document.getElementById("language").value;
+
+            // Submit task
+            await submitTask(name, year, language);
+        };
+    </script>
+</body>
+</html>

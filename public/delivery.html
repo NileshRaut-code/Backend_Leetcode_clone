@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+    <header class="bg-green-600 text-white py-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Delivery Tracker</h1>
+            <nav>
+                <a href="#" class="text-white hover:text-gray-300 mx-4">Home</a>
+                <a href="#" class="text-white hover:text-gray-300 mx-4">Support</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto my-10 p-6 bg-white rounded-lg shadow-lg flex-grow">
+        <h2 class="text-xl font-semibold mb-4">Track Delivery in Real-Time</h2>
+        <p id="demo" class="mb-4 text-gray-600"></p>
+        <div class="flex items-center mb-6 space-x-2">
+            <label for="orderid" class="block text-gray-700 font-medium">Enter Order ID:</label>
+            <input id="orderid" type="text" class="w-2/3 p-2 border border-gray-300 rounded-lg" placeholder="Order ID">
+        </div>
+        <div class="flex space-x-4">
+            <button onclick="orde()" class="w-1/2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                Disconnect to Server
+            </button>
+            <button onclick="gpssend()" class="w-1/2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                Send Location to Server
+            </button>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Delivery Tracker. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        let gps = {};
+        var interval;
+        let socket=false; 
+        function orde() {
+            console.log("diconnectin");
+            if(!socket){
+                console.log("please connect first then only disconnect will work");
+                return;
+                
+            }
+            socket.disconnect();
+            clearInterval(interval)
+            socket=false;
+        }
+
+        function gpssend() {
+            // const order_id = document.getElementById("orderid").value;
+            // console.log(order_id);
+        
+             socket = new io("http://localhost:8000");
+            const order_id = [123,1234]
+            console.log("Sending data to the server...");
+            socket.emit('register_delivery_guy', order_id);
+
+            navigator.geolocation.getCurrentPosition(function (location) {
+                gps.latitude = location.coords.latitude;
+                gps.longitude = location.coords.longitude;
+            });
+
+            interval=setInterval(() => {
+                const data =  {gps} ;
+                console.log(data);
+                socket.emit('gpsupdate', data);
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

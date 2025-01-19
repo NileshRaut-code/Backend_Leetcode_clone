@@ -1,0 +1,26 @@
+{
+  "name": "websocket",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "starts": "start cmd /k \"node src/server.js\" && start cmd /k \"node worker\" && start cmd /k \"node workercpp\"",
+    "dev": "nodemon --experimental-json-modules  src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "kafkajs": "^2.2.4",
+    "nodemon": "^3.1.4",
+    "pm2": "^5.4.3",
+    "redis": "^4.7.0",
+    "socket.io": "^4.7.5",
+    "vm2": "^3.9.19",
+    "ws": "^8.18.0"
+  }
+}
