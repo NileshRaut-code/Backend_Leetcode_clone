@@ -148,7 +148,7 @@
 
         function connectWebSocket() {
             // Connect to the WebSocket server with the clientId
-            ws = new WebSocket(`${wsProtocol}//${domain}:${port}?clientId=${clientId}`);
+            ws = new WebSocket(`${wsProtocol}//${domain}?clientId=${clientId}`);
 
             ws.onopen = () => {
                 console.log("Connected to WebSocket server");
