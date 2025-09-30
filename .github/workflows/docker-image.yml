@@ -25,5 +25,4 @@ jobs:
       with:
        context:
        push: true
-       tags: tempganya/leetcodebackend
-:latest
+       tags: tempganya/leetcodebackend:latest
