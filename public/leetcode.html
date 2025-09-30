@@ -206,7 +206,7 @@
                 document.getElementById("taskResult").innerHTML = `
                     <div>Processing your submission...</div>`;
 
-                const response = await fetch(`${baseUrl}:${port}/send`, {
+                const response = await fetch(`${baseUrl}/send`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
