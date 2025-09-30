@@ -2,7 +2,7 @@ import { createClient } from "redis";
 import { VM } from "vm2";
 
 const client = createClient({
-  url: "redis://localhost:6379", 
+  url: process.env.REDIS_URL || "redis://localhost:6379", 
 });
 
 async function dataWorker() {

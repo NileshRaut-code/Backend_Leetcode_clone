@@ -1,8 +1,14 @@
+#!/bin/sh
+set -e
 
+# Start redis in background
 redis-server --daemonize yes
 
-node src/server.js &
-node worker.js &
-node workercpp.js &
+# Start server in background
+node server.js &
 
-wait
+# Start worker in foreground (keeps container alive)
+node worker.js &
+
+node workercpp.js
+

@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 
 const client = createClient({
-  url: "redis://localhost:6379", // Redis connection
+  url: process.env.REDIS_URL || "redis://localhost:6379",
 });
 
 async function ensureTempDirectoryExists() {

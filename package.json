@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "starts": "start cmd /k \"node src/server.js\" && start cmd /k \"node worker\" && start cmd /k \"node workercpp\"",
-    "dev": "nodemon --experimental-json-modules  src/index.js"
+    "start": "node src/server.js",
+    "start:worker": "node worker.js",
+    "start:worker-cpp": "node workercpp.js",
+    "start:all": "pm2 start ecosystem.config.js",
+    "dev": "nodemon src/server.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +17,6 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "kafkajs": "^2.2.4",
     "nodemon": "^3.1.4",
     "pm2": "^5.4.3",
     "redis": "^4.7.0",

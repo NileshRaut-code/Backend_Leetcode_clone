@@ -1,20 +1,22 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-
-RUN npm install
-
-COPY . .
-
+# Install Redis inside the container
 RUN apk add --no-cache redis
 
-EXPOSE 3000 6379
+# Set working directory
+WORKDIR /app
 
-COPY start.sh /usr/src/app/start.sh
-RUN chmod +x /usr/src/app/start.sh
+# Copy package files first (better caching)
+COPY package*.json ./
 
-CMD ["sh", "/usr/src/app/start.sh"]
+# Install dependencies
+RUN npm install --only=production
 
+# Copy everything else
+COPY . .
 
+# Expose server port
+EXPOSE 3001
+
+# Start Redis + Server + Worker
+CMD ["./start.sh"]

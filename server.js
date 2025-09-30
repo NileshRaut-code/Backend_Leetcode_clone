@@ -10,13 +10,12 @@ app.use(express.json({ limit: "16kb" }));
 
 app.use(
     cors({
-      origin: "http://localhost:3001",
-      //origin: process.env.CORS_ORIGIN,
+      origin: process.env.CORS_ORIGIN || "http://localhost:3001",
       credentials: true,
     })
   );
 const redisClient = createClient({
- url: "redis://localhost:6379"
+ url: process.env.REDIS_URL || "redis://localhost:6379"
 });
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
@@ -85,8 +84,9 @@ async function startServer() {
             }
         });
 
-        server.listen(3001, () => {
-            console.log("Server is running on port 3000");
+        const PORT = process.env.PORT || 3001;
+        server.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
         });
     } catch (error) {
         console.error("Failed to connect to Redis", error);

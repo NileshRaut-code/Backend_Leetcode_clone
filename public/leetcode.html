@@ -3,58 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redis Queue with WebSocket</title>
+    <title>LeetCode Clone - Code Execution</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 200px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #taskResult {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: red;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            background: #e6ffe6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        #connectionStatus {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .connected {
+            background: #e6ffe6;
+            color: green;
+        }
+        .disconnected {
+            background: #ffe6e6;
+            color: red;
+        }
+    </style>
 </head>
 <body>
-    <h1>Submit Task</h1>
+    <div id="connectionStatus" class="disconnected">Disconnected</div>
+    <h1>LeetCode Clone - Code Execution</h1>
     <form id="taskForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" required><br>
+        <div class="form-group">
+            <label for="name">Your Name:</label>
+            <input type="text" id="name" required placeholder="Enter your name">
+        </div>
 
-        <label for="year">Language:</label>
-        <input type="text" id="year" required><br>
+        <div class="form-group">
+            <label for="year">Language Type:</label>
+            <select id="year" required>
+                <option value="js">JavaScript</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
 
-        <label for="language">Code:</label>
-        <input type="text" id="language" required><br>
+        <div class="form-group">
+            <label for="language">Your Code:</label>
+            <textarea id="language" required placeholder="Enter your code here..."></textarea>
+        </div>
 
-        <button type="submit">Submit Task</button>
+        <button type="submit">Execute Code</button>
     </form>
 
     <h2>Task Result</h2>
     <div id="taskResult">Waiting for result...</div>
 
     <script>
+        // Configuration
+        const domain = window.location.hostname;
+        const protocol = window.location.protocol;
+        const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
+        const baseUrl = `${protocol}//${domain}`;
+        const port = '3001'; // This should match your server's port
+
         // Generate a unique client ID for the session
         function generateClientId() {
             return 'client-' + Math.random().toString(36).substr(2, 9);
         }
 
         const clientId = generateClientId();
+        let ws;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        const reconnectDelay = 2000; // 2 seconds
 
-        // Connect to the WebSocket server with the clientId
-        const ws = new WebSocket(`ws://localhost:3000?clientId=${clientId}`);
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (connected) {
+                statusElement.textContent = 'Connected';
+                statusElement.className = 'connected';
+            } else {
+                statusElement.textContent = 'Disconnected';
+                statusElement.className = 'disconnected';
+            }
+        }
 
-        ws.onopen = () => {
-            console.log("Connected to WebSocket server");
-        };
+        function connectWebSocket() {
+            // Connect to the WebSocket server with the clientId
+            ws = new WebSocket(`${wsProtocol}//${domain}:${port}?clientId=${clientId}`);
 
-        ws.onmessage = (message) => {
-            // Handle messages received from the WebSocket server
-            const data = JSON.parse(message.data);
-            console.log("Task result received from WebSocket:", data);
+            ws.onopen = () => {
+                console.log("Connected to WebSocket server");
+                updateConnectionStatus(true);
+                reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+            };
 
-            // Display the result (or any other task-related data)
-            document.getElementById("taskResult").innerText = `Result: ${data.result}`;
-        };
+            ws.onmessage = (message) => {
+                try {
+                    const data = JSON.parse(message.data);
+                    console.log("Task result received:", data);
 
-        ws.onclose = () => {
-            console.log("Disconnected from WebSocket server");
-        };
+                    const resultElement = document.getElementById("taskResult");
+                    if (data.status === false) {
+                        resultElement.innerHTML = `<div class="error">
+                            <strong>Error:</strong><br>
+                            <pre>${data.result}</pre>
+                        </div>`;
+                    } else {
+                        resultElement.innerHTML = `<div class="success">
+                            <strong>Output:</strong><br>
+                            <pre>${data.result}</pre>
+                        </div>`;
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
+                    document.getElementById("taskResult").innerHTML = `
+                        <div class="error">Error processing server response</div>`;
+                }
+            };
+
+            ws.onclose = () => {
+                console.log("Disconnected from WebSocket server");
+                updateConnectionStatus(false);
+                
+                // Attempt to reconnect
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connectWebSocket, reconnectDelay);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                updateConnectionStatus(false);
+            };
+        }
+
+        // Initial WebSocket connection
+        connectWebSocket();
 
         // Function to submit a task to the server
         async function submitTask(name, year, language) {
             try {
-                const response = await fetch("http://localhost:3000/send", {
+                document.getElementById("taskResult").innerHTML = `
+                    <div>Processing your submission...</div>`;
+
+                const response = await fetch(`${baseUrl}:${port}/send`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -68,15 +220,17 @@
                 });
 
                 if (response.ok) {
-                    console.log("Task submitted successfully",response);
-                    document.getElementById("taskResult").innerText = `Your data is send in the queue succesfully and id is ${clientId} , waiting for the result`;
-
-                   // document.getElementById("taskResult").innerText = `Result: ${response}`;
+                    console.log("Task submitted successfully");
+                    document.getElementById("taskResult").innerHTML = `
+                        <div>Code submitted successfully. Waiting for execution results...</div>`;
                 } else {
-                    console.error("Failed to submit task");
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Failed to submit task');
                 }
             } catch (error) {
                 console.error("Error submitting task:", error);
+                document.getElementById("taskResult").innerHTML = `
+                    <div class="error">Error submitting code: ${error.message}</div>`;
             }
         }
 
@@ -84,13 +238,22 @@
         document.getElementById("taskForm").onsubmit = async (e) => {
             e.preventDefault();
 
-            // Get form values
-            const name = document.getElementById("name").value;
-            const year = document.getElementById("year").value;
-            const language = document.getElementById("language").value;
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
 
-            // Submit task
-            await submitTask(name, year, language);
+            try {
+                // Get form values
+                const name = document.getElementById("name").value;
+                const year = document.getElementById("year").value;
+                const language = document.getElementById("language").value;
+
+                // Submit task
+                await submitTask(name, year, language);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Execute Code';
+            }
         };
     </script>
 </body>
