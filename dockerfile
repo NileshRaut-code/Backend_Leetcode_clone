@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 3001
 
 # Start Redis + Server + Worker
-CMD ["./start.sh"]
+CMD ["sh", "/app/start.sh"]

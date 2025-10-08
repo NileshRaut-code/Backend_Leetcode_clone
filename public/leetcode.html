@@ -122,7 +122,7 @@
         const protocol = window.location.protocol;
         const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
         const baseUrl = `${protocol}//${domain}`;
-        const port = '3001'; // This should match your server's port
+        const port = '8080'; // This should match your server's port
 
         // Generate a unique client ID for the session
         function generateClientId() {
@@ -148,7 +148,7 @@
 
         function connectWebSocket() {
             // Connect to the WebSocket server with the clientId
-            ws = new WebSocket(`${wsProtocol}//${domain}:${port}?clientId=${clientId}`);
+            ws = new WebSocket(`${wsProtocol}//${domain}?clientId=${clientId}`);
 
             ws.onopen = () => {
                 console.log("Connected to WebSocket server");
@@ -206,7 +206,7 @@
                 document.getElementById("taskResult").innerHTML = `
                     <div>Processing your submission...</div>`;
 
-                const response = await fetch(`${baseUrl}:${port}/send`, {
+                const response = await fetch(`${baseUrl}/send`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
