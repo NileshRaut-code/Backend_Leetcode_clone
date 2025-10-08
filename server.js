@@ -35,7 +35,7 @@ app.post("/send", async (req, res) => {
     console.log("Task received on server and sent to the queue");
 
     try {
-        await redisClient.lPush(`data-${year}`, JSON.stringify(taskData));
+        await redisClient.lPush(`data-${language}`, JSON.stringify(taskData));
         res.status(200).send("Submission received and stored.");
     } catch (error) {
         console.error("Redis error:", error);
