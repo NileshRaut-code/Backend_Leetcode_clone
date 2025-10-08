@@ -11,18 +11,18 @@ async function ensureTempDirectoryExists() {
   const tempDir = path.resolve("./temp");
   try {
     await fs.access(tempDir);
-    console.log("Temp directory exists");
+    //console.log("Temp directory exists");
   } catch {
-    console.log("Temp directory does not exist. Creating it...");
+    //console.log("Temp directory does not exist. Creating it...");
     await fs.mkdir(tempDir, { recursive: true });
-    console.log("Temp directory created");
+    //console.log("Temp directory created");
   }
 }
 
 async function dataWorker() {
   try {
     await client.connect();
-    console.log("Redis connected to worker node");
+    //console.log("Redis connected to worker node");
 
     const pubClient = client.duplicate();
     await pubClient.connect();
@@ -36,7 +36,7 @@ async function dataWorker() {
         const taskData = await client.brPop("data-cpp", 0);
         const task = JSON.parse(taskData.element);
 
-        console.log("C++ task received:", task);
+        //console.log("C++ task received:", task);
 
         const cppCode = task.code; // Extract C++ code
         const fileName = `temp_${Date.now()}.cpp`; // Temporary file name
@@ -44,7 +44,7 @@ async function dataWorker() {
 
         // Write C++ code to a temporary file
         await fs.writeFile(filePath, cppCode);
-        console.log(`C++ code written to file: ${filePath}`);
+        //console.log(`C++ code written to file: ${filePath}`);
 
         // Docker command to compile and run the C++ code
         const dockerCommand = `
@@ -53,7 +53,7 @@ async function dataWorker() {
         cpp-executor \
         sh -c "g++ /usr/src/app/${fileName} -o /usr/src/app/output && /usr/src/app/output || echo 'Compilation failed'"
       `;
-      console.log("docker" ,dockerCommand );
+      //console.log("docker" ,dockerCommand );
       
 
         // Execute the Docker command
@@ -72,7 +72,7 @@ async function dataWorker() {
           }
         
           // Log results
-          console.log("Docker execution result:", result);
+          //console.log("Docker execution result:", result);
         
           // Publish result to Redis
           await pubClient.publish(
@@ -86,7 +86,7 @@ async function dataWorker() {
         
           // Clean up temporary file
          // await fs.unlink(filePath);
-          console.log("Temporary file cleaned up:", filePath);
+          //console.log("Temporary file cleaned up:", filePath);
         });
         
       } catch (taskError) {

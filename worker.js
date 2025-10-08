@@ -8,7 +8,7 @@ const client = createClient({
 async function dataWorker() {
   try {
     await client.connect();
-    console.log("Redis connected to worker node");
+    //console.log("Redis connected to worker node");
 
     const pubClient = client.duplicate();
     await pubClient.connect();
@@ -23,7 +23,7 @@ async function dataWorker() {
         const taskData = await client.brPop('data-js', 0);
         const task = JSON.parse(taskData.element);
 
-        console.log("Task received for execution:", task);
+        //console.log("Task received for execution:", task);
 
         let resultexe;
         let status = true;
@@ -36,7 +36,7 @@ async function dataWorker() {
           resultexe = `Error: ${error.message}`;
         }
 
-        console.log("Task execution result:", resultexe);
+        //console.log("Task execution result:", resultexe);
 
         const result = `Processed task for ${task.name}, output of the code: ${resultexe}`;
 
@@ -49,7 +49,7 @@ async function dataWorker() {
           }));
         }, 2000); 
 
-        console.log("Published task result:", result);
+        //console.log("Published task result:", result);
       } catch (taskError) {
         console.error("Error processing task:", taskError);
       }

@@ -17,7 +17,7 @@ app.use(
 const redisClient = createClient({
  url: process.env.REDIS_URL || "redis://localhost:6379"
 });
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('error', (err) => //console.log('Redis Client Error', err));
 
 const pubSubClient = redisClient.duplicate();
 const __dirname = path.resolve(path.dirname(''));
@@ -27,12 +27,12 @@ app.get('/leetcode', (req, res) => {
 });
 
 app.post("/send", async (req, res) => {
-    //console.log(req.body);
+    ////console.log(req.body);
     
     const { name, code, language, clientId } = req.body;
     const taskData = { name, code, language, clientId };
-    console.log("started",code);
-    console.log("Task received on server and sent to the queue");
+    //console.log("started",code);
+    //console.log("Task received on server and sent to the queue");
 
     try {
         await redisClient.lPush(`data-${language}`, JSON.stringify(taskData));
@@ -52,15 +52,15 @@ wss.on('connection', (ws, req) => {
     const clientId =req.url?.split('?clientId=')[1];
 
     if (clientId) {
-        // console.log(ws.id);
-        console.log(ws);
+        // //console.log(ws.id);
+        //console.log(ws);
         
         connectedClients.set(clientId, ws);
-        console.log(`Client ${clientId} connected via WebSocket`);
+        //console.log(`Client ${clientId} connected via WebSocket`);
 
         ws.on('close', () => {
             connectedClients.delete(clientId);
-            console.log(`Client ${clientId} disconnected`);
+            //console.log(`Client ${clientId} disconnected`);
         });
     }
 });
@@ -69,24 +69,24 @@ async function startServer() {
     try {
         await redisClient.connect();
         await pubSubClient.connect();
-        console.log("Connected to Redis");
+        //console.log("Connected to Redis");
 
         await pubSubClient.subscribe("taskUpdates", (message) => {
-            //console.log("taskupdate calling",JSON.parse(message))
+            ////console.log("taskupdate calling",JSON.parse(message))
             const { clientId, result,output ,status } = JSON.parse(message);
 
             const ws = connectedClients.get(clientId);
-           // console.log(ws);
+           // //console.log(ws);
             
             if (ws && ws.readyState === ws.OPEN) {
                 ws.send(JSON.stringify({ result, output,status}));
-                console.log(`Result sent to client ${clientId}`);
+                //console.log(`Result sent to client ${clientId}`);
             }
         });
 
         const PORT = process.env.PORT || 3001;
         server.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
+            //console.log(`Server is running on port ${PORT}`);
         });
     } catch (error) {
         console.error("Failed to connect to Redis", error);
