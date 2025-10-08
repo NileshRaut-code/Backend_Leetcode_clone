@@ -38,7 +38,7 @@ async function dataWorker() {
 
         console.log("C++ task received:", task);
 
-        const cppCode = task.language; // Extract C++ code
+        const cppCode = task.code; // Extract C++ code
         const fileName = `temp_${Date.now()}.cpp`; // Temporary file name
         const filePath = path.resolve("./temp", fileName);
 

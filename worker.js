@@ -29,7 +29,7 @@ async function dataWorker() {
         let status = true;
 
         try {
-          resultexe = vm.run(task.language, 'vm.js');
+          resultexe = vm.run(task.code, 'vm.js');
         } catch (error) {
           status = false; 
           console.error("Execution error:", error);

@@ -29,9 +29,9 @@ app.get('/leetcode', (req, res) => {
 app.post("/send", async (req, res) => {
     //console.log(req.body);
     
-    const { name, year, language, clientId } = req.body;
-    const taskData = { name, year, language, clientId };
-    console.log("started",language);
+    const { name, code, language, clientId } = req.body;
+    const taskData = { name, code, language, clientId };
+    console.log("started",code);
     console.log("Task received on server and sent to the queue");
 
     try {
